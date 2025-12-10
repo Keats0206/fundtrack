@@ -1,5 +1,4 @@
 import { supabase, getServiceSupabase } from '../supabase';
-import { searchCompanyNews } from '../perplexity-api';
 import type { Database } from '../supabase';
 
 type Alert = Database['public']['Tables']['alerts']['Row'];
@@ -106,8 +105,9 @@ export async function scanCompany(
       return { success: false, alertsCreated: 0 };
     }
 
-    // Call Perplexity API
-    const results = await searchCompanyNews(companyName, 10);
+    // Generate mock alerts for now
+    // Real implementation would call Perplexity via /api/intelligence
+    const results = getMockAlerts(companyName);
 
     if (!results || results.length === 0) {
       return { success: true, alertsCreated: 0 };
@@ -198,5 +198,20 @@ function detectType(text: string): string {
   }
 
   return 'news';
+}
+
+function getMockAlerts(companyName: string) {
+  return [
+    {
+      title: `${companyName} announces new product features`,
+      url: 'https://techcrunch.com/example',
+      snippet: `${companyName} continues to expand its platform with innovative features targeting enterprise customers.`,
+    },
+    {
+      title: `${companyName} expands market presence`,
+      url: 'https://bloomberg.com/example',
+      snippet: `Market analysis shows ${companyName} gaining traction in competitive landscape.`,
+    },
+  ];
 }
 

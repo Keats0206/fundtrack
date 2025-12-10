@@ -1,5 +1,4 @@
 import { supabase, getServiceSupabase } from '../supabase';
-import { searchCompanyNews } from '../perplexity-api';
 import type { Database } from '../supabase';
 
 type Insight = Database['public']['Tables']['insights']['Row'];

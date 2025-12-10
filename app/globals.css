@@ -120,3 +120,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .mantis-gradient {
+    background: linear-gradient(90deg, #dc2626 0%, #ec4899 25%, #a855f7 50%, #6366f1 75%, #3b82f6 100%);
+  }
+  
+  .mantis-gradient-text {
+    background: linear-gradient(90deg, #dc2626 0%, #ec4899 25%, #a855f7 50%, #6366f1 75%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .mantis-glow {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+  }
+}

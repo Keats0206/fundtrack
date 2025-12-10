@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Portfolio Tracker - AI-Powered VC Intelligence",
-  description: "Track your portfolio companies with AI-powered insights and real-time updates",
+  title: "FundTrack | Portfolio Intelligence",
+  description: "AI-powered intelligence for venture capital portfolios",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="dark"
           enableSystem
           disableTransitionOnChange
         >

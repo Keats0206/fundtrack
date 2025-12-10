@@ -11,11 +11,13 @@ import { getCompanyById } from '@/lib/supabase/companies';
 import { getAlerts } from '@/lib/supabase/alerts-client';
 import { getInsights } from '@/lib/supabase/insights-client';
 import type { Database } from '@/lib/supabase';
+import { IntelligenceMarkdown } from '@/components/intelligence-markdown';
 import {
   ArrowLeft,
   ExternalLink,
   Loader2,
   RefreshCw,
+  Zap,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
@@ -24,39 +26,102 @@ type Company = Database['public']['Tables']['companies']['Row'];
 type Alert = Database['public']['Tables']['alerts']['Row'];
 type Insight = Database['public']['Tables']['insights']['Row'];
 
-// Generate contextual insights with investor actions
-function generateMockInsights(companyName: string, alertCount: number) {
-  const insights = [
-    {
-      id: '1',
-      company_id: '1',
-      insight_type: 'growth_opportunity',
-      content: `${companyName} showing strong momentum. Recent product launch generating buzz. **Investor Action:** Intro to your Enterprise SaaS portfolio companies for cross-selling opportunities.`,
-      generated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 86400000).toISOString(),
-      created_at: new Date().toISOString(),
+// Enhanced Perplexity-style intelligence reports
+function generateMockIntelligence(companyName: string, sector: string) {
+  const intelligenceByCompany: Record<string, any> = {
+    'Mythical Games': {
+      score: 78,
+      momentum: 'positive',
+      summary: 'Mythical Games is in the middle of a new funding and product expansion push, centered on web3 identity and an overhaul of its flagship titles like NFL Rivals.',
+      sections: [
+        {
+          title: 'Funding and Strategic Moves',
+          content: 'Mythical is closing a new Series D funding round in October 2025, with investors including Eightco Holdings, which is connected to the Worldcoin (WLD) ecosystem. As part of this round, the company plans to integrate verified human identity and "proof of human" systems (via Worldcoin tech) into its web3 gaming platform to address bots, fraud, and account sharing. Public data puts Mythical\'s historical funding at over $280 million prior to this round, with backers such as a16z, WestCap, and others.',
+          action: 'Monitor dilution impact and assess if bridge financing is needed before Series D close. Strong investor syndicate signals continued conviction.'
+        },
+        {
+          title: 'Product and Game Updates',
+          content: 'NFL Rivals, Mythical\'s licensed NFL web3 mobile game, hit roughly 6-7 million downloads but saw growth plateau as the game became too pay-to-win, leading the team to stop heavy marketing and rework core systems. For Year 3 (Season 3) launching August 20, Mythical is doing a soft "reset" of progression: wiping base cards, introducing locked launch-set cards (800+ new cards across all 32 teams), and revamping the upgrade and league systems to make onboarding and competitiveness fairer for new players.',
+          action: 'Evaluate user retention metrics post-reset. Consider introducing portfolio to NFL partnerships team for cross-promotion opportunities.'
+        },
+        {
+          title: 'Strategic Direction',
+          content: 'The Worldcoin identity integration signals a bet that "proof of human" will become a differentiator in web3 games, especially for economies that rely on scarcity and tradeable assets. Mythical is positioning itself as an infrastructure-plus-IP player: running its own web3 platform, using sports and entertainment brands (like the NFL) as flagship showcases, and layering in on-chain identity and marketplaces for tradable in-game assets.',
+          action: 'Connect team with web3 infrastructure portfolio companies (Alchemy, Figment) for potential partnership synergies. Assess if platform play warrants higher valuation multiple.'
+        }
+      ]
     },
-    {
-      id: '2',
-      company_id: '1',
-      insight_type: 'hiring_support',
-      content: `Team expansion signals detected. Likely preparing for scale. **Investor Action:** Share VP Engineering candidates from your network. Connect with your executive recruiting partner.`,
-      generated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 86400000).toISOString(),
-      created_at: new Date().toISOString(),
+    'Superhuman': {
+      score: 85,
+      momentum: 'strong_positive',
+      summary: 'Superhuman continues to show strong enterprise momentum with new team features and AI capabilities, positioning for a potential Series C in H1 2026.',
+      sections: [
+        {
+          title: 'Product and Market Position',
+          content: 'Superhuman recently launched AI-powered email triage and auto-responses, seeing 40% adoption among power users within first month. The team product (launched Q3 2024) now represents 35% of revenue, up from 15% at launch. Enterprise deals ($100K+ ACV) grew 200% YoY, with notable wins at Stripe, Notion, and several portfolio companies.',
+          action: 'Facilitate introductions to remaining portfolio companies for enterprise pilots. Strong product-market fit in knowledge worker segment.'
+        },
+        {
+          title: 'Competitive Dynamics',
+          content: 'Gmail and Outlook are both shipping AI features, but Superhuman maintains edge in speed and design. New competitor Shortwave (YC S22) raised $12M Series A but still <50K users vs Superhuman\'s 500K+. Market is expanding rather than fragmenting—premium email tools growing 45% annually.',
+          action: 'Not immediate threat, but monitor Shortwave\'s enterprise push. Consider strategic partnership or acqui-hire if team is strong.'
+        },
+        {
+          title: 'Funding and Growth',
+          content: 'Burn rate improved 30% while maintaining 3x net revenue retention. Company is default alive but likely to raise Series C in H1 2026 to accelerate enterprise sales hiring. Current valuation estimates at $500-700M based on comparable SaaS multiples.',
+          action: 'Prepare for pro-rata allocation in Series C. Consider increasing ownership given strong unit economics and clear path to $100M ARR.'
+        }
+      ]
     },
-    {
-      id: '3',
-      company_id: '1',
-      insight_type: 'strategic_partnership',
-      content: `Competitive landscape heating up. Market consolidation expected in 6-12 months. **Investor Action:** Facilitate partnership discussions with complementary portfolio companies. Consider bridge round for M&A positioning.`,
-      generated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 86400000).toISOString(),
-      created_at: new Date().toISOString(),
-    },
-  ];
+    'Stability AI': {
+      score: 62,
+      momentum: 'mixed',
+      summary: 'Stability AI is navigating leadership transition and market competition while shipping new models and pursuing enterprise pivot.',
+      sections: [
+        {
+          title: 'Leadership and Strategic Changes',
+          content: 'Emad Mostaque stepped down as CEO in March 2024, replaced by interim co-CEOs from COO and CPO roles. Company is conducting formal CEO search while refocusing on enterprise licensing and away from consumer products. Several key researchers departed to Anthropic and OpenAI in Q2 2024.',
+          action: 'Schedule board meeting to assess CEO search progress. Evaluate talent retention strategies and consider bridge compensation packages for key technical leads.'
+        },
+        {
+          title: 'Product and Technology',
+          content: 'Stable Diffusion 3 launched in June 2024 with strong improvements in text rendering and composition, but adoption slower than SD 2.0 due to licensing changes. New video model (Stable Video Diffusion) gaining traction in creative tools market. API revenue up 180% YoY as enterprise customers (Adobe, Canva, Jasper) deepen integrations.',
+          action: 'Enterprise pivot is working—encourage shift away from consumer. Connect with design tool portfolio companies for partnership opportunities.'
+        },
+        {
+          title: 'Competitive and Financial Position',
+          content: 'Facing intense competition from Midjourney (consumer), OpenAI DALL-E (enterprise), and open-source alternatives (SDXL fine-tunes). Burn rate remains elevated at ~$5M/month. Runway through Q2 2026 assuming current revenue trajectory, but may need bridge round if enterprise sales don\'t accelerate.',
+          action: 'Critical: Assess bridge financing need within next 2 quarters. Prepare term sheet for inside round at flat/slight down valuation to extend runway 12+ months.'
+        }
+      ]
+    }
+  };
 
-  return alertCount === 0 ? insights.slice(0, 1) : insights;
+  // Default template for companies not in the map
+  const defaultIntelligence = {
+    score: 72,
+    momentum: 'positive',
+    summary: `${companyName} is showing healthy growth indicators across product development and market positioning in the ${sector} sector.`,
+    sections: [
+      {
+        title: 'Recent Developments',
+        content: `${companyName} continues to execute on its product roadmap with recent feature launches showing strong user adoption. The team has expanded by 25% in the last quarter, focusing on engineering and go-to-market roles. Several strategic partnerships announced with industry leaders signal growing market validation.`,
+        action: 'Schedule quarterly business review to assess hiring plan sustainability and evaluate burn rate trajectory.'
+      },
+      {
+        title: 'Market Position',
+        content: `The ${sector} market is experiencing 30-40% annual growth, with ${companyName} well-positioned in the mid-market segment. Competitive dynamics remain favorable with no significant new entrants in the last 6 months. Customer retention metrics (110% net revenue retention) indicate strong product-market fit.`,
+        action: 'Facilitate introductions to 2-3 strategic accounts in your network. Consider organizing customer advisory board with peer portfolio companies.'
+      },
+      {
+        title: 'Strategic Priorities',
+        content: `Company is focused on reaching $10M ARR milestone (currently at $7.2M) before raising Series B in Q3 2025. Key initiatives include enterprise product tier launch, international expansion (UK/EU), and potential M&A of smaller competitor to accelerate market share.`,
+        action: 'Proactively source Series B co-investors. If M&A target is identified, leverage your network for diligence and deal support.'
+      }
+    ]
+  };
+
+  return intelligenceByCompany[companyName] || defaultIntelligence;
 }
 
 export default function CompanyDetailPage() {
@@ -66,6 +131,9 @@ export default function CompanyDetailPage() {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [intelligenceText, setIntelligenceText] = useState<string>('');
+  const [isLoadingIntelligence, setIsLoadingIntelligence] = useState(false);
+  const [fundId, setFundId] = useState<string>('');
 
   useEffect(() => {
     loadData();
@@ -75,6 +143,11 @@ export default function CompanyDetailPage() {
     if (!params.id) return;
     
     setLoading(true);
+    
+    // Get fund session for branding
+    const sessionResponse = await fetch('/api/auth/session');
+    const sessionData = await sessionResponse.json();
+    setFundId(sessionData.session?.fundId || '');
     
     // Check if Supabase is configured
     const hasSupabase = process.env.NEXT_PUBLIC_SUPABASE_URL && 
@@ -117,10 +190,7 @@ export default function CompanyDetailPage() {
           }));
         
         setAlerts(companyAlerts as any);
-        
-        // Generate company-specific insights with investor actions
-        const companyInsights = generateMockInsights(mockCompany.name, companyAlerts.length);
-        setInsights(companyInsights as any);
+        setInsights([]);
       }
       
       setLoading(false);
@@ -141,28 +211,37 @@ export default function CompanyDetailPage() {
   }
 
   async function handleRefresh() {
-    if (!params.id || scanning) return;
+    if (!params.id || isLoadingIntelligence) return;
     
-    setScanning(true);
+    setIsLoadingIntelligence(true);
+    setIntelligenceText('');
+    
     try {
-      // Clear old insights before generating new ones
-      setInsights([]);
+      const response = await fetch(`/api/intelligence/${params.id}`);
       
-      // Trigger Perplexity scan
-      const response = await fetch(`/api/scan/${params.id}`, {
-        method: 'POST',
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        // Reload data to show new alerts and insights
-        await loadData();
+      if (!response.ok) {
+        throw new Error('Failed to fetch intelligence');
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let accumulated = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value);
+          accumulated += chunk;
+          setIntelligenceText(accumulated);
+        }
       }
     } catch (error) {
-      console.error('Scan error:', error);
+      console.error('Intelligence error:', error);
+      setIntelligenceText('Error loading intelligence. Please try again.');
     } finally {
-      setScanning(false);
+      setIsLoadingIntelligence(false);
     }
   }
 
@@ -175,6 +254,17 @@ export default function CompanyDetailPage() {
       market: '📊',
     };
     return icons[type] || '📌';
+  };
+
+  const getBadgeVariant = (type: string): any => {
+    const variants: Record<string, string> = {
+      funding: 'bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20',
+      product: 'bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20',
+      hiring: 'bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20',
+      news: 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/20',
+      market: 'bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-500/20',
+    };
+    return variants[type] || 'bg-gray-500/10 text-gray-700 dark:text-gray-400 border-gray-500/20';
   };
 
   if (loading) {
@@ -199,12 +289,17 @@ export default function CompanyDetailPage() {
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Portfolio
-              </Button>
-            </Link>
+            <div className="flex items-center gap-6">
+              <Link href="/">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Portfolio
+                </Button>
+              </Link>
+              <div className="text-xl font-black tracking-tighter mantis-gradient-text">
+                {fundId === 'mantis' ? 'MANTISVC' : 'FUNDTRACK'}
+              </div>
+            </div>
             <ThemeToggle />
           </div>
           
@@ -226,25 +321,6 @@ export default function CompanyDetailPage() {
             
             {company.website && (
             <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleRefresh}
-                disabled={scanning}
-                className="gap-2"
-              >
-                {scanning ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Scanning...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4" />
-                    Refresh Intelligence
-                  </>
-                )}
-              </Button>
               {company.website && (
                 <Button variant="outline" size="sm" asChild>
                   <a href={company.website} target="_blank" rel="noopener noreferrer">
@@ -261,53 +337,63 @@ export default function CompanyDetailPage() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="space-y-6">
-          {/* AI Intelligence */}
-          <Card>
+          {/* AI Intelligence - Streaming */}
+          <Card className="bg-card/50 border-border/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle>AI Intelligence</CardTitle>
-              <CardDescription>Latest insights from Perplexity AI</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="h-5 w-5 text-purple-500" />
+                    AI Intelligence Report
+                  </CardTitle>
+                  <CardDescription>Powered by Perplexity + OpenAI</CardDescription>
+                </div>
+                <Button 
+                  onClick={handleRefresh}
+                  disabled={isLoadingIntelligence}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                >
+                  {isLoadingIntelligence ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4" />
+                      Generate Report
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
-              <CardContent className="space-y-3">
-              {insights.length > 0 ? (
-                insights.map((insight) => {
-                  // Split content at "Investor Action:" for highlighting
-                  const parts = insight.content.split('**Investor Action:**');
-                  const analysis = parts[0]?.trim();
-                  const action = parts[1]?.trim();
-                  
-                  return (
-                    <div key={insight.id} className="p-4 border rounded-lg">
-                      <h4 className="font-semibold mb-2 capitalize">
-                        {insight.insight_type.replace(/_/g, ' ')}
-                      </h4>
-                      <p className="text-sm text-muted-foreground mb-3">{analysis}</p>
-                      {action && (
-                        <div className="mt-3 pt-3 border-t">
-                          <p className="text-xs font-semibold mb-1">💡 Recommended Action:</p>
-                          <p className="text-sm">{action}</p>
-                        </div>
-                      )}
-                      <p className="text-xs text-muted-foreground mt-2">
-                        Generated {formatDistanceToNow(new Date(insight.generated_at), { addSuffix: true })}
-                      </p>
-                    </div>
-                  );
-                })
-              ) : scanning ? (
-                <div className="p-4 border rounded-lg text-center">
-                  <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Generating AI insights...
+            <CardContent>
+              {intelligenceText ? (
+                <IntelligenceMarkdown content={intelligenceText} />
+              ) : isLoadingIntelligence ? (
+                <div className="py-12 text-center">
+                  <div className="flex items-center justify-center gap-3 mb-4">
+                    <Loader2 className="h-6 w-6 animate-spin text-purple-500" />
+                    <span className="text-sm font-medium">Gathering intelligence from Perplexity...</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    This may take 10-15 seconds
                   </p>
                 </div>
               ) : (
-                <div className="p-4 border rounded-lg text-center">
-                  <p className="text-sm text-muted-foreground">
-                    Click "Refresh Intelligence" to generate insights
+                <div className="py-12 text-center">
+                  <Zap className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
+                  <p className="text-sm text-muted-foreground mb-2">
+                    No intelligence report generated yet
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Click "Generate Report" to get real-time VC insights
                   </p>
                 </div>
               )}
-              </CardContent>
+            </CardContent>
           </Card>
 
           {/* Alert Timeline */}
@@ -323,13 +409,16 @@ export default function CompanyDetailPage() {
                     <div key={alert.id} className="flex gap-4 pb-4 border-b last:border-0">
                       <div className="text-2xl">{getUpdateIcon(alert.type)}</div>
                       <div className="flex-1">
-                        <div className="flex items-start justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">{alert.type}</Badge>
-                            {alert.sentiment === 'negative' && (
-                              <Badge variant="destructive" className="text-xs">Critical</Badge>
-                            )}
-                          </div>
+                      <div className="flex items-start justify-between mb-1">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-xs ${getBadgeVariant(alert.type)}`}>{alert.type}</Badge>
+                          {alert.sentiment === 'negative' && (
+                            <Badge className="text-xs bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/20">Critical</Badge>
+                          )}
+                          {alert.sentiment === 'positive' && (
+                            <Badge className="text-xs bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20">Positive</Badge>
+                          )}
+                        </div>
                           <span className="text-xs text-muted-foreground">
                             {formatDistanceToNow(new Date(alert.detected_at), { addSuffix: true })}
                           </span>

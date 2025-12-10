@@ -190,7 +190,8 @@ export const mockUpdates: CompanyUpdate[] = [
     sentiment: 'neutral',
   },
   {
-    id: 'u6',
+    id: 'u7',
+    companyId: '3',
     companyName: 'Mythical Games',
     type: 'news',
     title: 'NFL Rivals Game Surpasses 1M Users',
@@ -198,8 +199,6 @@ export const mockUpdates: CompanyUpdate[] = [
     source: 'VentureBeat',
     date: new Date('2024-12-07T09:00:00'),
     sentiment: 'positive',
-    companyId: '3',
-    id: 'u7',
   },
   {
     id: 'u8',
