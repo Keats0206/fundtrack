@@ -9,7 +9,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "FundTrack | Portfolio Intelligence",
+  title: "FundTrack | VC Portfolio Intelligence",
   description: "AI-powered intelligence for venture capital portfolios",
 };
 
